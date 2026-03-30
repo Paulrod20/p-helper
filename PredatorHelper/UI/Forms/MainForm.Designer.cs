@@ -1,6 +1,6 @@
-﻿namespace PredatorHelper
+﻿namespace PredatorHelper.UI.Forms
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -31,7 +31,7 @@
             components = new System.ComponentModel.Container();
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Text = "Form1";
+            Text = "PredatorHelper";
         }
 
         #endregion

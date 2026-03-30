@@ -9,11 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Hardware\" />
     <Folder Include="Core\Models\" />
     <Folder Include="Core\Services\" />
     <Folder Include="Helpers\" />
     <Folder Include="UI\Controls\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
   </ItemGroup>
 
 </Project>
