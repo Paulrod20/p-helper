@@ -13,6 +13,7 @@ namespace PredatorHelper.UI.Forms
             InitializeComponent();
             ApplyTheme();
             BuildUI();
+            UpdatePowerState();
 
             _monitor = new HardwareMonitor();
             _monitor.Open();
@@ -115,6 +116,29 @@ namespace PredatorHelper.UI.Forms
             var tempLabel = this.Controls.Find("tempLabel", false).FirstOrDefault();
             if (tempLabel != null)
                 tempLabel.Text = $"CPU: {cpuTemp:F1}°C   GPU: {gpuTemp:F1}°C";
+
+            UpdatePowerState();
+        }
+
+        private void UpdatePowerState()
+        {
+            bool isPluggedIn = SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Online;
+
+            var pluggedInOnly = new[] { "Silent", "Perform", "Turbo" };
+            var batteryOnly = new[] { "Eco" };
+
+            foreach (Control c in this.Controls)
+            {
+                if (c is not Button btn || !_modes.Contains(btn.Tag?.ToString())) continue;
+
+                var mode = btn.Tag?.ToString();
+                bool enabled = isPluggedIn
+                    ? !batteryOnly.Contains(mode) 
+                    : !pluggedInOnly.Contains(mode);
+
+                btn.Enabled = enabled;
+                btn.BackColor = enabled ? Color.FromArgb(50, 50, 50) : Color.FromArgb(35, 35, 35);
+            }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
