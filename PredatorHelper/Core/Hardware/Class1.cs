@@ -12,6 +12,7 @@ namespace PredatorHelper.Core.Hardware
             {
                 IsCpuEnabled = true,
                 IsGpuEnabled = true,
+                IsMotherboardEnabled = true
             };
         }
 
@@ -20,16 +21,23 @@ namespace PredatorHelper.Core.Hardware
 
         public float? GetCpuTemperature()
         {
-            foreach (var hardware in _computer.Hardware) 
+            foreach (var hardware in _computer.Hardware)
             {
-                if (hardware.HardwareType == HardwareType.Cpu)
+                hardware.Update();
+                foreach (var subhardware in hardware.SubHardware)
                 {
-                    hardware.Update();
-                    foreach (var sensor in hardware.Sensors) 
+                    subhardware.Update();
+                    foreach (var sensor in subhardware.Sensors)
                     {
-                        if (sensor.SensorType == SensorType.Temperature && sensor.Name == "CPU Package")
+                        if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue && sensor.Value > 0)
                             return sensor.Value;
                     }
+                }
+                foreach (var sensor in hardware.Sensors)
+                {
+                    if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue && sensor.Value > 0 &&
+                        (sensor.Name.Contains("CPU") || sensor.Name.Contains("Core") || sensor.Name.Contains("Package")))
+                        return sensor.Value;
                 }
             }
             return null;
@@ -37,14 +45,14 @@ namespace PredatorHelper.Core.Hardware
 
         public float? GetGpuTemperature()
         {
-            foreach (var hardware in _computer.Hardware) 
+            foreach (var hardware in _computer.Hardware)
             {
-                if (hardware.HardwareType == HardwareType.GpuNvidia)
+                if (hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuAmd)
                 {
                     hardware.Update();
                     foreach (var sensor in hardware.Sensors)
                     {
-                        if(sensor.SensorType == SensorType.Temperature)
+                        if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
                             return sensor.Value;
                     }
                 }
