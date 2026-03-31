@@ -7,6 +7,7 @@ namespace PredatorHelper.UI.Forms
         private readonly HardwareMonitor _monitor;
         private readonly System.Windows.Forms.Timer _timer;
         private readonly string[] _modes = { "Silent", "Balanced", "Perform", "Turbo", "Eco" };
+        private NotifyIcon _trayIcon = null!;
 
         public MainForm()
         {
@@ -14,6 +15,7 @@ namespace PredatorHelper.UI.Forms
             ApplyTheme();
             BuildUI();
             UpdatePowerState();
+            SetupTray();
 
             _monitor = new HardwareMonitor();
             _monitor.Open();
@@ -33,7 +35,13 @@ namespace PredatorHelper.UI.Forms
             this.MaximizeBox = false;
             this.Size = new Size(560, 600);
             this.Text = "PredatorHelper";
-            this.StartPosition = FormStartPosition.CenterScreen;
+            this.StartPosition = FormStartPosition.Manual;
+
+            var screen = Screen.PrimaryScreen!.WorkingArea;
+            this.Location = new Point(
+                screen.Right - this.Width - 10,
+                screen.Bottom - this.Height - 60
+            );
         }
 
         private void BuildUI()
@@ -141,10 +149,69 @@ namespace PredatorHelper.UI.Forms
             }
         }
 
+        private void SetupTray()
+        {
+            _trayIcon = new NotifyIcon
+            {
+                Text = "PredatorHelper",
+                Icon = SystemIcons.Application,
+                Visible = true
+            };
+
+            var trayMenu = new ContextMenuStrip();
+            trayMenu.Items.Add("Open", null, (s, e) => ShowWindow());
+            trayMenu.Items.Add("Quit", null, (s, e) => Application.Exit());
+
+            _trayIcon.ContextMenuStrip = trayMenu;
+            _trayIcon.Click += (s, e) => ShowWindow();
+        }
+
+        private void ShowWindow()
+        {
+            var screen = Screen.PrimaryScreen!.WorkingArea;
+            this.Location = new Point(
+                screen.Right - this.Width - 10,
+                screen.Bottom - this.Height - 60
+            );
+
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            this.BringToFront();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                var result = MessageBox.Show(
+                    "Quit PredatorHelper?",
+                    "Confirm",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (result == DialogResult.Yes) { 
+                    Application.Exit();
+                }
+            }
+            base.OnFormClosing(e);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Hide();
+            }
+            base.OnResize(e);
+        }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             _monitor.Close();
             _timer.Stop();
+            _trayIcon.Dispose();
             base.OnFormClosed(e);
         }
     }
