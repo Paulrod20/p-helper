@@ -36,5 +36,36 @@ namespace PredatorHelper.Core.Services
             catch { }
             return false;
         }
+
+        public string? GetCurrentMode()
+        {
+            try
+            {
+                using var searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM AcerGamingFunction");
+                foreach (ManagementObject obj in searcher.Get())
+                {
+                    var inParams = obj.GetMethodParameters("GetGamingMiscSetting");
+                    inParams["gmInput"] = (ulong)0x0B;
+                    var outParams = obj.InvokeMethod("GetGamingMiscSetting", inParams, null);
+                    var raw = (ulong)outParams["gmOutput"];
+
+                    if ((raw & 0xFF) != 0) return null;
+
+                    byte profileValue = (byte)((raw >> 8) & 0xFF);
+
+                    return profileValue switch
+                    {
+                        0x00 => "Silent",
+                        0x01 => "Balanced",
+                        0x04 => "Perform",
+                        0x05 => "Turbo",
+                        0x06 => "Eco",
+                        _ => null
+                    };
+                }
+            }
+            catch { }
+            return null;
+        }
     }
 }

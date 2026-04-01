@@ -19,6 +19,8 @@ namespace PredatorHelper.UI.Forms
             ApplyTheme();
             BuildUI();
             UpdatePowerState();
+            _selectedMode = _modeService.GetCurrentMode() ?? string.Empty;
+            UpdatePowerState();
             SetupTray();
 
             _monitor = new HardwareMonitor();
