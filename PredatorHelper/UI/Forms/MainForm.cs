@@ -1,4 +1,6 @@
 using PredatorHelper.Core.Hardware;
+using PredatorHelper.Core.Services;
+
 
 namespace PredatorHelper.UI.Forms
 {
@@ -7,6 +9,8 @@ namespace PredatorHelper.UI.Forms
         private readonly HardwareMonitor _monitor;
         private readonly System.Windows.Forms.Timer _timer;
         private readonly string[] _modes = { "Silent", "Balanced", "Perform", "Turbo", "Eco" };
+        private readonly PerformanceModeService _modeService = new();
+        private string _selectedMode = string.Empty;
         private NotifyIcon _trayIcon = null!;
 
         public MainForm()
@@ -83,6 +87,7 @@ namespace PredatorHelper.UI.Forms
                     Size = new Size(96, 55),
                     Location = new Point(btnX, 90),
                     FlatStyle = FlatStyle.Flat,
+                    UseVisualStyleBackColor = false,
                     BackColor = Color.FromArgb(50, 50, 50),
                     ForeColor = Color.White,
                     Font = new Font("Segoe UI", 8.5f),
@@ -183,17 +188,13 @@ namespace PredatorHelper.UI.Forms
         {
             if (sender is not Button clicked) return;
 
-            foreach (Control c in this.Controls)
-            {
-                if (c is Button btn && _modes.Contains(btn.Tag?.ToString()))
-                {
-                    btn.BackColor = Color.FromArgb(50, 50, 50);
-                    btn.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
-                }
-            }
+            var mode = clicked.Tag?.ToString();
+            if (mode == null) return;
 
-            clicked.BackColor = Color.FromArgb(0, 120, 80);
-            clicked.FlatAppearance.BorderColor = Color.FromArgb(0, 180, 120);
+            _selectedMode = mode;
+            UpdatePowerState();
+
+            _modeService.SetMode(mode);
         }
 
         private void UpdateReadings(object? sender, EventArgs e)
@@ -233,11 +234,21 @@ namespace PredatorHelper.UI.Forms
 
                 var mode = btn.Tag?.ToString();
                 bool enabled = isPluggedIn
-                    ? !batteryOnly.Contains(mode) 
+                    ? !batteryOnly.Contains(mode)
                     : !pluggedInOnly.Contains(mode);
 
                 btn.Enabled = enabled;
-                btn.BackColor = enabled ? Color.FromArgb(50, 50, 50) : Color.FromArgb(35, 35, 35);
+
+                if (mode == _selectedMode)
+                {
+                    btn.BackColor = Color.FromArgb(0, 120, 80);
+                    btn.FlatAppearance.BorderColor = Color.FromArgb(0, 180, 120);
+                }
+                else
+                {
+                    btn.BackColor = enabled ? Color.FromArgb(50, 50, 50) : Color.FromArgb(35, 35, 35);
+                    btn.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
+                }
             }
         }
 
