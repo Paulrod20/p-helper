@@ -10,6 +10,8 @@ namespace PredatorHelper.UI.Forms
         private readonly System.Windows.Forms.Timer _timer;
         private readonly string[] _modes = { "Silent", "Balanced", "Perform", "Turbo", "Eco" };
         private readonly PerformanceModeService _modeService = new();
+        private readonly SettingsService _settingsService = new();
+        private AppSettings _settings = new();
         private string _selectedMode = string.Empty;
         private NotifyIcon _trayIcon = null!;
 
@@ -18,8 +20,14 @@ namespace PredatorHelper.UI.Forms
             InitializeComponent();
             ApplyTheme();
             BuildUI();
-            UpdatePowerState();
-            _selectedMode = _modeService.GetCurrentMode() ?? string.Empty;
+
+            _settings = _settingsService.Load();
+            _selectedMode = _settings.LastMode;
+
+            if (string.IsNullOrWhiteSpace(_selectedMode))
+                _selectedMode = _modeService.GetCurrentMode() ?? string.Empty;
+
+            ApplySavedSettings();
             UpdatePowerState();
             SetupTray();
 
@@ -181,6 +189,9 @@ namespace PredatorHelper.UI.Forms
                 var label = this.Controls.Find("batteryValueLabel", false).FirstOrDefault();
                 if (label != null)
                     label.Text = $"{batterySlider.Value}%";
+
+                _settings.BatteryLimit = batterySlider.Value;
+                _settingsService.Save(_settings);
             };
 
             this.Controls.AddRange(new Control[] { batteryTitle, batteryPercentLabel, batteryValueLabel, batterySlider });
@@ -194,9 +205,29 @@ namespace PredatorHelper.UI.Forms
             if (mode == null) return;
 
             _selectedMode = mode;
+            _settings.LastMode = mode;
+            _settingsService.Save(_settings);
             UpdatePowerState();
 
             _modeService.SetMode(mode);
+        }
+
+        private void ApplySavedSettings()
+        {
+            var batterySlider = this.Controls.Find("batterySlider", false).FirstOrDefault() as TrackBar;
+            var batteryValueLabel = this.Controls.Find("batteryValueLabel", false).FirstOrDefault();
+
+            if (batterySlider != null)
+            {
+                var savedLimit = Math.Clamp(_settings.BatteryLimit, batterySlider.Minimum, batterySlider.Maximum);
+                batterySlider.Value = savedLimit;
+
+                if (batteryValueLabel != null)
+                    batteryValueLabel.Text = $"{savedLimit}%";
+            }
+
+            if (!_modes.Contains(_selectedMode))
+                _selectedMode = string.Empty;
         }
 
         private void UpdateReadings(object? sender, EventArgs e)
@@ -308,6 +339,7 @@ namespace PredatorHelper.UI.Forms
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
+            _settingsService.Save(_settings);
             _monitor.Close();
             _timer.Stop();
             _trayIcon.Dispose();
