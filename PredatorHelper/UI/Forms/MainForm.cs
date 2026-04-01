@@ -107,9 +107,18 @@ namespace PredatorHelper.UI.Forms
                 AutoSize = true
             };
 
+            var batteryPercentLabel = new Label { 
+                Name = "batteryPercentLabel",
+                Text = $"Charge: {SystemInformation.PowerStatus.BatteryLifePercent * 100:F0}%",
+                Font = new Font("Segoe UI", 9f),
+                ForeColor= Color.Silver,
+                Location = new Point(420, 228),
+                AutoSize = true
+            };
+
             var batteryValueLabel = new Label { 
                 Name = "batteryValueLabel",
-                Text = "80%",
+                Text = "100%",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.Silver,
                 Location = new Point(490, 165),
@@ -120,7 +129,7 @@ namespace PredatorHelper.UI.Forms
                 Name = "batterySlider",
                 Minimum = 60,
                 Maximum = 100,
-                Value = 80,
+                Value = 100,
                 TickFrequency = 10,
                 LargeChange = 10,
                 SmallChange = 5,
@@ -136,7 +145,7 @@ namespace PredatorHelper.UI.Forms
                     label.Text = $"{batterySlider.Value}%";
             };
 
-            this.Controls.AddRange(new Control[] { batteryTitle, batteryValueLabel, batterySlider });
+            this.Controls.AddRange(new Control[] { batteryTitle, batteryPercentLabel, batteryValueLabel, batterySlider });
         }
 
         private void ModeButton_Click(object? sender, EventArgs e)
@@ -166,6 +175,10 @@ namespace PredatorHelper.UI.Forms
                 tempLabel.Text = $"CPU: {cpuTemp:F1}°C   GPU: {gpuTemp:F1}°C";
 
             UpdatePowerState();
+
+            var batteryPercenLabel = this.Controls.Find("batteryPercentLabel", false).FirstOrDefault();
+            if (batteryPercenLabel != null)
+                batteryPercenLabel.Text = $"Charge: {SystemInformation.PowerStatus.BatteryLifePercent * 100:F0}%";
         }
 
         private void UpdatePowerState()
@@ -208,12 +221,6 @@ namespace PredatorHelper.UI.Forms
 
         private void ShowWindow()
         {
-            var screen = Screen.PrimaryScreen!.WorkingArea;
-            this.Location = new Point(
-                screen.Right - this.Width - 10,
-                screen.Bottom - this.Height - 60
-            );
-
             this.Show();
             this.WindowState = FormWindowState.Normal;
             this.BringToFront();
