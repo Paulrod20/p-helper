@@ -98,6 +98,37 @@ namespace PredatorHelper.UI.Forms
 
             this.Controls.AddRange(new Control[] { headerLabel, tempLabel, modeTitle });
 
+            var fanTitle = new Label
+            {
+                Text = "🌀 Fan Speeds",
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                ForeColor = Color.White,
+                Location = new Point(16, 235),
+                AutoSize = true
+            };
+
+            var cpuFanLabel = new Label
+            {
+                Name = "cpuFanLabel",
+                Text = "CPU Fan: -- RPM",
+                Font = new Font("Segoe UI", 9f),
+                ForeColor = Color.Silver,
+                Location = new Point(20, 260),
+                AutoSize = true
+            };
+
+            var gpuFanLabel = new Label
+            {
+                Name = "gpuFanLabel",
+                Text = "GPU Fan: -- RPM",
+                Font = new Font("Segoe UI", 9f),
+                ForeColor = Color.Silver,
+                Location = new Point(200, 260),
+                AutoSize = true
+            };
+
+            this.Controls.AddRange(new Control[] { fanTitle, cpuFanLabel, gpuFanLabel });
+
             // --- Battery Charge Limit Section ---
             var batteryTitle = new Label {
                 Text = "🔋 Battery Charge Limit",
@@ -175,6 +206,14 @@ namespace PredatorHelper.UI.Forms
                 tempLabel.Text = $"CPU: {cpuTemp:F1}°C   GPU: {gpuTemp:F1}°C";
 
             UpdatePowerState();
+
+            var cpuFanLabel = this.Controls.Find("cpuFanLabel", false).FirstOrDefault();
+            if (cpuFanLabel != null)
+                cpuFanLabel.Text = $"CPU Fan: {_monitor.GetCpuFanSpeed() ?? 0} RPM";
+
+            var gpuFanLabel = this.Controls.Find("gpuFanLabel", false).FirstOrDefault();
+            if (gpuFanLabel != null)
+                gpuFanLabel.Text = $"GPU Fan: {_monitor.GetGpuFanSpeed() ?? 0} RPM";
 
             var batteryPercenLabel = this.Controls.Find("batteryPercentLabel", false).FirstOrDefault();
             if (batteryPercenLabel != null)

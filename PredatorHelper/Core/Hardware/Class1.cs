@@ -1,4 +1,5 @@
 ﻿using LibreHardwareMonitor.Hardware;
+using System.Management;
 
 namespace PredatorHelper.Core.Hardware
 {
@@ -59,5 +60,28 @@ namespace PredatorHelper.Core.Hardware
             }
             return null;
         }
+
+        private int? GetFanSpeed(ulong sensorId)
+        {
+            try
+            {
+                using var searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM AcerGamingFunction");
+                foreach (ManagementObject obj in searcher.Get())
+                {
+                    var cmd = (ulong)(0x0001 | (sensorId << 8));
+                    var inParams = obj.GetMethodParameters("GetGamingSysInfo");
+                    inParams["gmInput"] = cmd;
+                    var outParams = obj.InvokeMethod("GetGamingSysInfo", inParams, null);
+                    var raw = (ulong)outParams["gmOutput"];
+                    if ((raw & 0xFF) == 0)
+                        return (int)((raw >> 8) & 0xFFFF);
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        public int? GetCpuFanSpeed() => GetFanSpeed(0x02);
+        public int? GetGpuFanSpeed() => GetFanSpeed(0x06);
     }
 }
