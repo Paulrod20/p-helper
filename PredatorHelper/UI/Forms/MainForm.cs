@@ -97,6 +97,46 @@ namespace PredatorHelper.UI.Forms
             }
 
             this.Controls.AddRange(new Control[] { headerLabel, tempLabel, modeTitle });
+
+            // --- Battery Charge Limit Section ---
+            var batteryTitle = new Label {
+                Text = "🔋 Battery Charge Limit",
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                ForeColor = Color.White,
+                Location = new Point(16, 165),
+                AutoSize = true
+            };
+
+            var batteryValueLabel = new Label { 
+                Name = "batteryValueLabel",
+                Text = "80%",
+                Font = new Font("Segoe UI", 9f),
+                ForeColor = Color.Silver,
+                Location = new Point(490, 165),
+                AutoSize = true
+            };
+
+            var batterySlider = new TrackBar { 
+                Name = "batterySlider",
+                Minimum = 60,
+                Maximum = 100,
+                Value = 80,
+                TickFrequency = 10,
+                LargeChange = 10,
+                SmallChange = 5,
+                Location = new Point(16, 188),
+                Size = new Size(520, 40),
+                BackColor = Color.FromArgb(30, 30, 30)
+            };
+
+            batterySlider.ValueChanged += (s, e) =>
+            {
+                var label = this.Controls.Find("batteryValueLabel", false).FirstOrDefault();
+                if (label != null)
+                    label.Text = $"{batterySlider.Value}%";
+            };
+
+            this.Controls.AddRange(new Control[] { batteryTitle, batteryValueLabel, batterySlider });
         }
 
         private void ModeButton_Click(object? sender, EventArgs e)
