@@ -6,6 +6,7 @@ namespace PredatorHelper.Core.Hardware
     public class HardwareMonitor
     {
         private readonly Computer _computer;
+        private ManagementObject? _acerWmi;
 
         public HardwareMonitor()
         {
@@ -19,6 +20,15 @@ namespace PredatorHelper.Core.Hardware
 
         public void Open() => _computer.Open();
         public void Close() => _computer.Close();
+
+        private ManagementObject GetAcerWmi()
+        {
+            if (_acerWmi != null) return _acerWmi;
+            var searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM AcerGamingFunction");
+            _acerWmi = searcher.Get().Cast<ManagementObject>().FirstOrDefault()
+                       ?? throw new InvalidOperationException("AcerGamingFunction WMI not found");
+            return _acerWmi;
+        }
 
         public float? GetCpuTemperature()
         {
@@ -65,19 +75,16 @@ namespace PredatorHelper.Core.Hardware
         {
             try
             {
-                using var searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM AcerGamingFunction");
-                foreach (ManagementObject obj in searcher.Get())
-                {
-                    var cmd = (ulong)(0x0001 | (sensorId << 8));
-                    var inParams = obj.GetMethodParameters("GetGamingSysInfo");
-                    inParams["gmInput"] = cmd;
-                    var outParams = obj.InvokeMethod("GetGamingSysInfo", inParams, null);
-                    var raw = (ulong)outParams["gmOutput"];
-                    if ((raw & 0xFF) == 0)
-                        return (int)((raw >> 8) & 0xFFFF);
-                }
+                var obj = GetAcerWmi();
+                var cmd = (ulong)(0x0001 | (sensorId << 8));
+                var inParams = obj.GetMethodParameters("GetGamingSysInfo");
+                inParams["gmInput"] = cmd;
+                var outParams = obj.InvokeMethod("GetGamingSysInfo", inParams, null);
+                var raw = (ulong)outParams["gmOutput"];
+                if ((raw & 0xFF) == 0)
+                    return (int)((raw >> 8) & 0xFFFF);
             }
-            catch { }
+            catch { _acerWmi = null; } 
             return null;
         }
 

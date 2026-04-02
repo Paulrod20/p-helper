@@ -1,7 +1,6 @@
 using PredatorHelper.Core.Hardware;
 using PredatorHelper.Core.Services;
 
-
 namespace PredatorHelper.UI.Forms
 {
     public partial class MainForm : Form
@@ -14,12 +13,14 @@ namespace PredatorHelper.UI.Forms
         private AppSettings _settings = new();
         private string _selectedMode = string.Empty;
         private NotifyIcon _trayIcon = null!;
+        private int _tickCount = 0;
 
         public MainForm()
         {
             InitializeComponent();
             ApplyTheme();
             BuildUI();
+            UpdatePowerState();
 
             _settings = _settingsService.Load();
             _selectedMode = _settings.LastMode;
@@ -144,8 +145,8 @@ namespace PredatorHelper.UI.Forms
 
             this.Controls.AddRange(new Control[] { fanTitle, cpuFanLabel, gpuFanLabel });
 
-            // --- Battery Charge Limit Section ---
-            var batteryTitle = new Label {
+            var batteryTitle = new Label
+            {
                 Text = "🔋 Battery Charge Limit",
                 Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.White,
@@ -153,16 +154,18 @@ namespace PredatorHelper.UI.Forms
                 AutoSize = true
             };
 
-            var batteryPercentLabel = new Label { 
+            var batteryPercentLabel = new Label
+            {
                 Name = "batteryPercentLabel",
                 Text = $"Charge: {SystemInformation.PowerStatus.BatteryLifePercent * 100:F0}%",
                 Font = new Font("Segoe UI", 9f),
-                ForeColor= Color.Silver,
+                ForeColor = Color.Silver,
                 Location = new Point(420, 228),
                 AutoSize = true
             };
 
-            var batteryValueLabel = new Label { 
+            var batteryValueLabel = new Label
+            {
                 Name = "batteryValueLabel",
                 Text = "100%",
                 Font = new Font("Segoe UI", 9f),
@@ -171,7 +174,8 @@ namespace PredatorHelper.UI.Forms
                 AutoSize = true
             };
 
-            var batterySlider = new TrackBar { 
+            var batterySlider = new TrackBar
+            {
                 Name = "batterySlider",
                 Minimum = 60,
                 Maximum = 100,
@@ -232,6 +236,8 @@ namespace PredatorHelper.UI.Forms
 
         private void UpdateReadings(object? sender, EventArgs e)
         {
+            _tickCount++;
+
             var cpuTemp = _monitor.GetCpuTemperature();
             var gpuTemp = _monitor.GetGpuTemperature();
 
@@ -241,13 +247,16 @@ namespace PredatorHelper.UI.Forms
 
             UpdatePowerState();
 
-            var cpuFanLabel = this.Controls.Find("cpuFanLabel", false).FirstOrDefault();
-            if (cpuFanLabel != null)
-                cpuFanLabel.Text = $"CPU Fan: {_monitor.GetCpuFanSpeed() ?? 0} RPM";
+            if (_tickCount % 3 == 0)
+            {
+                var cpuFanLabel = this.Controls.Find("cpuFanLabel", false).FirstOrDefault();
+                if (cpuFanLabel != null)
+                    cpuFanLabel.Text = $"CPU Fan: {_monitor.GetCpuFanSpeed() ?? 0} RPM";
 
-            var gpuFanLabel = this.Controls.Find("gpuFanLabel", false).FirstOrDefault();
-            if (gpuFanLabel != null)
-                gpuFanLabel.Text = $"GPU Fan: {_monitor.GetGpuFanSpeed() ?? 0} RPM";
+                var gpuFanLabel = this.Controls.Find("gpuFanLabel", false).FirstOrDefault();
+                if (gpuFanLabel != null)
+                    gpuFanLabel.Text = $"GPU Fan: {_monitor.GetGpuFanSpeed() ?? 0} RPM";
+            }
 
             var batteryPercenLabel = this.Controls.Find("batteryPercentLabel", false).FirstOrDefault();
             if (batteryPercenLabel != null)
@@ -321,9 +330,8 @@ namespace PredatorHelper.UI.Forms
                     MessageBoxIcon.Question
                 );
 
-                if (result == DialogResult.Yes) { 
+                if (result == DialogResult.Yes)
                     Application.Exit();
-                }
             }
             base.OnFormClosing(e);
         }
@@ -331,9 +339,7 @@ namespace PredatorHelper.UI.Forms
         protected override void OnResize(EventArgs e)
         {
             if (this.WindowState == FormWindowState.Minimized)
-            {
                 this.Hide();
-            }
             base.OnResize(e);
         }
 
