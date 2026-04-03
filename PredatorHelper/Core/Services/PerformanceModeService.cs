@@ -43,6 +43,33 @@ namespace PredatorHelper.Core.Services
             return false;
         }
 
+        // Fan mode values from Linux kernel source (acer-wmi.c)
+        // Auto = 0x01, Max = 0x02 (labeled "Turbo" internally), Custom = 0x03
+        public bool SetFanMode(string fanMode)
+        {
+            byte mode = fanMode switch
+            {
+                "Auto" => 0x01,
+                "Max" => 0x02, // WMI calls this Turbo internally
+                "Custom" => 0x03,
+                _ => 0x01
+            };
+
+            try
+            {
+                var obj = GetAcerWmi();
+                var inParams = obj.GetMethodParameters("SetGamingFanBehavior");
+                // 0x09 = CPU fan (bit 0) + GPU fan (bit 3)
+                ulong input = (ulong)(0x09 | (mode << 16) | (mode << 22));
+                inParams["gmInput"] = input;
+                var outParams = obj.InvokeMethod("SetGamingFanBehavior", inParams, null);
+                var result = (ulong)outParams["gmOutput"];
+                return (result & 0xFF) == 0;
+            }
+            catch { _acerWmi = null; }
+            return false;
+        }
+
         public string? GetCurrentMode()
         {
             try

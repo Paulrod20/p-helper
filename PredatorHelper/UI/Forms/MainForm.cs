@@ -119,7 +119,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "🌀 Fan Speeds",
                 Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.White,
-                Location = new Point(16, 235),
+                Location = new Point(16, 250),
                 AutoSize = true
             };
 
@@ -129,7 +129,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "CPU Fan: -- RPM",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.Silver,
-                Location = new Point(20, 260),
+                Location = new Point(20, 275),
                 AutoSize = true
             };
 
@@ -139,18 +139,53 @@ namespace PredatorHelper.UI.Forms
                 Text = "GPU Fan: -- RPM",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.Silver,
-                Location = new Point(200, 260),
+                Location = new Point(200, 275),
                 AutoSize = true
             };
 
             this.Controls.AddRange(new Control[] { fanTitle, cpuFanLabel, gpuFanLabel });
+
+            var fanControlTitle = new Label
+            {
+                Text = "Fan Control",
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                ForeColor = Color.White,
+                Location = new Point(16, 310),
+                AutoSize = true
+            };
+
+            string[] fanModes = { "Auto", "Max", "Custom" };
+            int fanBtnX = 16;
+            foreach (var fanMode in fanModes)
+            {
+                var btn = new Button
+                {
+                    Text = fanMode,
+                    Size = new Size(96, 55),
+                    Location = new Point(fanBtnX, 340),
+                    FlatStyle = FlatStyle.Flat,
+                    UseVisualStyleBackColor = false,
+                    BackColor = Color.FromArgb(50, 50, 50),
+                    ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 8.5f),
+                    Cursor = Cursors.Hand,
+                    Tag = "fan_" + fanMode
+                };
+                btn.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
+                btn.FlatAppearance.BorderSize = 1;
+                btn.Click += FanButton_Click;
+                this.Controls.Add(btn);
+                fanBtnX += 100;
+            }
+
+            this.Controls.Add(fanControlTitle);
 
             var batteryTitle = new Label
             {
                 Text = "🔋 Battery Charge Limit",
                 Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.White,
-                Location = new Point(16, 165),
+                Location = new Point(16, 170),
                 AutoSize = true
             };
 
@@ -160,7 +195,7 @@ namespace PredatorHelper.UI.Forms
                 Text = $"Charge: {SystemInformation.PowerStatus.BatteryLifePercent * 100:F0}%",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.Silver,
-                Location = new Point(420, 228),
+                Location = new Point(420, 235),
                 AutoSize = true
             };
 
@@ -170,7 +205,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "100%",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.Silver,
-                Location = new Point(490, 165),
+                Location = new Point(490, 170),
                 AutoSize = true
             };
 
@@ -183,7 +218,7 @@ namespace PredatorHelper.UI.Forms
                 TickFrequency = 10,
                 LargeChange = 10,
                 SmallChange = 5,
-                Location = new Point(16, 188),
+                Location = new Point(16, 195),
                 Size = new Size(520, 40),
                 BackColor = Color.FromArgb(30, 30, 30)
             };
@@ -214,6 +249,29 @@ namespace PredatorHelper.UI.Forms
             UpdatePowerState();
 
             _modeService.SetMode(mode);
+        }
+
+        private void FanButton_Click(object? sender, EventArgs e)
+        {
+            if (sender is not Button clicked) return;
+
+            var tag = clicked.Tag?.ToString();
+            if (tag == null || !tag.StartsWith("fan_")) return;
+
+            var fanMode = tag.Replace("fan_", "");
+            _modeService.SetFanMode(fanMode);
+
+            foreach (Control c in this.Controls)
+            {
+                if (c is Button btn && btn.Tag?.ToString()?.StartsWith("fan_") == true)
+                {
+                    btn.BackColor = Color.FromArgb(50, 50, 50);
+                    btn.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
+                }
+            }
+
+            clicked.BackColor = Color.FromArgb(0, 120, 80);
+            clicked.FlatAppearance.BorderColor = Color.FromArgb(0, 180, 120);
         }
 
         private void ApplySavedSettings()
