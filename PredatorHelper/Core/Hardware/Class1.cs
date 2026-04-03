@@ -32,6 +32,27 @@ namespace PredatorHelper.Core.Hardware
             return null;
         }
 
+        public float? GetBatteryHealth()
+        {
+            try
+            {
+                var fullCharged = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM BatteryFullChargedCapacity")
+                    .Get().Cast<ManagementObject>().FirstOrDefault();
+                var staticData = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM BatteryStaticData")
+                    .Get().Cast<ManagementObject>().FirstOrDefault();
+
+                if (fullCharged == null || staticData == null) return null;
+
+                float full = Convert.ToSingle(fullCharged["FullChargedCapacity"]);
+                float designed = Convert.ToSingle(staticData["DesignedCapacity"]);
+
+                if (designed <= 0) return null;
+                return (full / designed) * 100f;
+            }
+            catch { }
+            return null;
+        }
+
         public void Open() { }
         public void Close() { }
 

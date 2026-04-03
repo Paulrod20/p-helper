@@ -14,6 +14,7 @@ namespace PredatorHelper.UI.Forms
         private string _selectedMode = string.Empty;
         private NotifyIcon _trayIcon = null!;
         private int _tickCount = 0;
+        private bool _hoveringBatteryLabel = false;
 
         public MainForm()
         {
@@ -199,6 +200,19 @@ namespace PredatorHelper.UI.Forms
                 AutoSize = true
             };
 
+            batteryPercentLabel.MouseEnter += (s, e) =>
+            {
+                _hoveringBatteryLabel = true;
+                var health = _monitor.GetBatteryHealth();
+                batteryPercentLabel.Text = health.HasValue ? $"Health: {health:F1}%" : "Health: --";
+            };
+
+            batteryPercentLabel.MouseLeave += (s, e) =>
+            {
+                _hoveringBatteryLabel = false;
+                batteryPercentLabel.Text = $"Charge: {SystemInformation.PowerStatus.BatteryLifePercent * 100:F0}%";
+            };
+
             var batteryValueLabel = new Label
             {
                 Name = "batteryValueLabel",
@@ -316,9 +330,12 @@ namespace PredatorHelper.UI.Forms
                     gpuFanLabel.Text = $"GPU Fan: {_monitor.GetGpuFanSpeed() ?? 0} RPM";
             }
 
-            var batteryPercenLabel = this.Controls.Find("batteryPercentLabel", false).FirstOrDefault();
-            if (batteryPercenLabel != null)
-                batteryPercenLabel.Text = $"Charge: {SystemInformation.PowerStatus.BatteryLifePercent * 100:F0}%";
+            if (!_hoveringBatteryLabel)
+            {
+                var batteryPercenLabel = this.Controls.Find("batteryPercentLabel", false).FirstOrDefault();
+                if (batteryPercenLabel != null)
+                    batteryPercenLabel.Text = $"Charge: {SystemInformation.PowerStatus.BatteryLifePercent * 100:F0}%";
+            }
         }
 
         private void UpdatePowerState()
