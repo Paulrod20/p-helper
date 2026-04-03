@@ -86,7 +86,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "⚡ Performance Mode",
                 Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.White,
-                Location = new Point(16, 58),
+                Location = new Point(16, 45),
                 AutoSize = true
             };
 
@@ -97,7 +97,7 @@ namespace PredatorHelper.UI.Forms
                 {
                     Text = mode,
                     Size = new Size(96, 55),
-                    Location = new Point(btnX, 90),
+                    Location = new Point(btnX, 70),
                     FlatStyle = FlatStyle.Flat,
                     UseVisualStyleBackColor = false,
                     BackColor = Color.FromArgb(50, 50, 50),
@@ -120,7 +120,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "🌀 Fan Speeds",
                 Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.White,
-                Location = new Point(16, 250),
+                Location = new Point(16, 220),
                 AutoSize = true
             };
 
@@ -130,7 +130,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "CPU Fan: -- RPM",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.Silver,
-                Location = new Point(20, 275),
+                Location = new Point(20, 240),
                 AutoSize = true
             };
 
@@ -140,7 +140,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "GPU Fan: -- RPM",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.Silver,
-                Location = new Point(200, 275),
+                Location = new Point(150, 240),
                 AutoSize = true
             };
 
@@ -151,7 +151,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "Fan Control",
                 Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.White,
-                Location = new Point(16, 310),
+                Location = new Point(16, 280),
                 AutoSize = true
             };
 
@@ -163,7 +163,7 @@ namespace PredatorHelper.UI.Forms
                 {
                     Text = fanMode,
                     Size = new Size(96, 55),
-                    Location = new Point(fanBtnX, 340),
+                    Location = new Point(fanBtnX, 305),
                     FlatStyle = FlatStyle.Flat,
                     UseVisualStyleBackColor = false,
                     BackColor = Color.FromArgb(50, 50, 50),
@@ -186,7 +186,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "🔋 Battery Charge Limit",
                 Font = new Font("Segoe UI", 9f, FontStyle.Bold),
                 ForeColor = Color.White,
-                Location = new Point(16, 170),
+                Location = new Point(16, 150),
                 AutoSize = true
             };
 
@@ -196,7 +196,7 @@ namespace PredatorHelper.UI.Forms
                 Text = $"Charge: {SystemInformation.PowerStatus.BatteryLifePercent * 100:F0}%",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.Silver,
-                Location = new Point(420, 235),
+                Location = new Point(430, 195),
                 AutoSize = true
             };
 
@@ -219,7 +219,7 @@ namespace PredatorHelper.UI.Forms
                 Text = "100%",
                 Font = new Font("Segoe UI", 9f),
                 ForeColor = Color.Silver,
-                Location = new Point(490, 170),
+                Location = new Point(490, 150),
                 AutoSize = true
             };
 
@@ -232,7 +232,7 @@ namespace PredatorHelper.UI.Forms
                 TickFrequency = 10,
                 LargeChange = 10,
                 SmallChange = 5,
-                Location = new Point(16, 195),
+                Location = new Point(16, 170),
                 Size = new Size(520, 40),
                 BackColor = Color.FromArgb(30, 30, 30)
             };
